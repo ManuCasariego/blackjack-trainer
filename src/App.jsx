@@ -97,9 +97,8 @@ function optimalAction(cards, dealerRank, { canDouble, canSurrender, canSplit })
   const isPair = cards.length === 2 && rankValue(cards[0].rank) === rankValue(cards[1].rank);
 
   if (canSurrender && !isPair && !soft) {
-    if (total === 16 && [9, 10, "A"].includes(dealerRank === "J" || dealerRank === "Q" || dealerRank === "K" ? 10 : dealerRank === "10" ? 10 : dealerRank))
-      return "R";
-    if (total === 15 && (dealerRank === "10" || ["J", "Q", "K"].includes(dealerRank))) return "R";
+    if (total === 16 && [7, 8, 9].includes(idx)) return "R"; // dealer 9, 10-value, or A
+    if (total === 15 && idx === 8) return "R"; // dealer 10-value
   }
 
   if (isPair && canSplit) {
