@@ -314,6 +314,7 @@ function SettingsModal({ onClose, showTotal, onToggleShowTotal }) {
           <button
             role="switch"
             aria-checked={showTotal}
+            aria-label="Show hand total"
             onClick={() => onToggleShowTotal(!showTotal)}
             className={`w-12 h-7 rounded-full relative transition-colors ${
               showTotal ? "bg-emerald-500" : "bg-white/20"
@@ -345,12 +346,19 @@ export default function BlackjackTrainer() {
   const [chartOpen, setChartOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [showTotal, setShowTotal] = useState(() => {
-    const stored = localStorage.getItem("21trainer.showTotal");
-    return stored === null ? true : stored === "true";
+    try {
+      return localStorage.getItem("21trainer.showTotal") !== "false";
+    } catch {
+      return true;
+    }
   });
 
   useEffect(() => {
-    localStorage.setItem("21trainer.showTotal", String(showTotal));
+    try {
+      localStorage.setItem("21trainer.showTotal", String(showTotal));
+    } catch {
+      // localStorage unavailable (e.g. private browsing) — setting just won't persist
+    }
   }, [showTotal]);
 
   const draw = useCallback(() => {
@@ -619,7 +627,7 @@ export default function BlackjackTrainer() {
                   </div>
                   <div className="flex items-center gap-2 text-xs">
                     <span className="font-semibold text-yellow-200">
-                      {showTotal || stage === "result"
+                      {showTotal || stage === "result" || h.done
                         ? v.soft
                           ? `Soft ${v.total}`
                           : v.total
