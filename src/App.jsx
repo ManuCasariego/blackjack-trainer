@@ -303,8 +303,8 @@ function SettingsModal({ onClose, showTotal, onToggleShowTotal }) {
           </button>
         </div>
 
-        <div className="flex items-center justify-between py-3 border-t border-white/10">
-          <div>
+        <div className="flex items-center justify-between gap-3 py-3 border-t border-white/10">
+          <div className="min-w-0">
             <div className="text-sm font-semibold text-emerald-100">Show hand total</div>
             <div className="text-xs text-emerald-200/60 mt-0.5">
               Practice counting your hand in your head
@@ -315,13 +315,13 @@ function SettingsModal({ onClose, showTotal, onToggleShowTotal }) {
             aria-checked={showTotal}
             aria-label="Show hand total"
             onClick={() => onToggleShowTotal(!showTotal)}
-            className={`w-12 h-7 rounded-full relative transition-colors ${
+            className={`w-12 h-7 rounded-full relative transition-colors shrink-0 ${
               showTotal ? "bg-emerald-500" : "bg-white/20"
             }`}
           >
             <span
-              className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform ${
-                showTotal ? "translate-x-5" : "translate-x-0.5"
+              className={`absolute top-0.5 left-0 w-6 h-6 rounded-full bg-white shadow transition-transform ${
+                showTotal ? "translate-x-[22px]" : "translate-x-0.5"
               }`}
             />
           </button>
