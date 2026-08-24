@@ -286,7 +286,9 @@ function StrategyChart({ onClose, activeHint }) {
 }
 
 // ---------- Settings overlay ----------
-function SettingsModal({ onClose, showTotal, onToggleShowTotal }) {
+const DECK_OPTIONS = [4, 6, 8];
+
+function SettingsModal({ onClose, showTotal, onToggleShowTotal, numDecks, onChangeNumDecks }) {
   return (
     <div className="fixed inset-0 z-50 bg-black/70 flex items-end sm:items-center justify-center">
       <div
@@ -326,6 +328,29 @@ function SettingsModal({ onClose, showTotal, onToggleShowTotal }) {
             />
           </button>
         </div>
+
+        <div className="py-3 border-t border-white/10">
+          <div className="text-sm font-semibold text-emerald-100">Number of decks</div>
+          <div className="text-xs text-emerald-200/60 mt-0.5 mb-2">
+            Size of the shoe, applied starting with your next Deal
+          </div>
+          <div className="flex gap-2">
+            {DECK_OPTIONS.map((n) => (
+              <button
+                key={n}
+                onClick={() => onChangeNumDecks(n)}
+                aria-pressed={numDecks === n}
+                className={`flex-1 py-2 rounded-lg text-sm font-semibold border ${
+                  numDecks === n
+                    ? "bg-emerald-600 border-emerald-500 text-white"
+                    : "bg-white/5 border-white/10 text-emerald-100/70"
+                }`}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -335,7 +360,6 @@ function SettingsModal({ onClose, showTotal, onToggleShowTotal }) {
 let handCounter = 0;
 
 export default function BlackjackTrainer() {
-  const shoeRef = useRef(buildShoe(6));
   const [dealer, setDealer] = useState({ cards: [], hideHole: true });
   const [hands, setHands] = useState([]); // {cards, done, isDoubled, result, bust, splitAces}
   const [activeHand, setActiveHand] = useState(0);
@@ -351,6 +375,17 @@ export default function BlackjackTrainer() {
       return true;
     }
   });
+  const [numDecks, setNumDecks] = useState(() => {
+    try {
+      const stored = Number(localStorage.getItem("21trainer.numDecks"));
+      return [4, 6, 8].includes(stored) ? stored : 6;
+    } catch {
+      return 6;
+    }
+  });
+
+  const shoeRef = useRef(buildShoe(numDecks));
+  const shoeDecksRef = useRef(numDecks);
 
   useEffect(() => {
     try {
@@ -360,16 +395,31 @@ export default function BlackjackTrainer() {
     }
   }, [showTotal]);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem("21trainer.numDecks", String(numDecks));
+    } catch {
+      // localStorage unavailable (e.g. private browsing) — setting just won't persist
+    }
+  }, [numDecks]);
+
   const draw = useCallback(() => {
-    if (shoeRef.current.length < 20) shoeRef.current = buildShoe(6);
+    if (shoeRef.current.length < 20) {
+      shoeRef.current = buildShoe(numDecks);
+      shoeDecksRef.current = numDecks;
+    }
     return shoeRef.current.pop();
-  }, []);
+  }, [numDecks]);
 
   function dealerUpRank() {
     return dealer.cards[0]?.rank;
   }
 
   function startHand() {
+    if (shoeDecksRef.current !== numDecks) {
+      shoeRef.current = buildShoe(numDecks);
+      shoeDecksRef.current = numDecks;
+    }
     const p1 = draw(),
       p2 = draw(),
       d1 = draw(),
@@ -694,6 +744,8 @@ export default function BlackjackTrainer() {
           onClose={() => setSettingsOpen(false)}
           showTotal={showTotal}
           onToggleShowTotal={setShowTotal}
+          numDecks={numDecks}
+          onChangeNumDecks={setNumDecks}
         />
       )}
     </div>
