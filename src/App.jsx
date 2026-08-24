@@ -619,7 +619,11 @@ export default function BlackjackTrainer() {
                   </div>
                   <div className="flex items-center gap-2 text-xs">
                     <span className="font-semibold text-yellow-200">
-                      {v.soft ? `Soft ${v.total}` : v.total}
+                      {showTotal || stage === "result"
+                        ? v.soft
+                          ? `Soft ${v.total}`
+                          : v.total
+                        : "—"}
                     </span>
                     {h.isDoubled && <span className="text-emerald-300">2x</span>}
                     {h.result && <ResultBadge result={h.result} />}
