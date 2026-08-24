@@ -286,6 +286,51 @@ function StrategyChart({ onClose, activeHint }) {
   );
 }
 
+// ---------- Settings overlay ----------
+function SettingsModal({ onClose, showTotal, onToggleShowTotal }) {
+  return (
+    <div className="fixed inset-0 z-50 bg-black/70 flex items-end sm:items-center justify-center">
+      <div
+        className="w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl max-h-[88vh] overflow-y-auto p-4 pb-8"
+        style={{ background: "linear-gradient(180deg,#0a3f2d,#062318)" }}
+      >
+        <div className="flex items-center justify-between mb-3">
+          <div className="text-yellow-400 font-serif text-xl">Settings</div>
+          <button
+            onClick={onClose}
+            className="text-emerald-100 bg-white/10 hover:bg-white/20 rounded-full w-8 h-8 flex items-center justify-center"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="flex items-center justify-between py-3 border-t border-white/10">
+          <div>
+            <div className="text-sm font-semibold text-emerald-100">Show hand total</div>
+            <div className="text-xs text-emerald-200/60 mt-0.5">
+              Practice counting your hand in your head
+            </div>
+          </div>
+          <button
+            role="switch"
+            aria-checked={showTotal}
+            onClick={() => onToggleShowTotal(!showTotal)}
+            className={`w-12 h-7 rounded-full relative transition-colors ${
+              showTotal ? "bg-emerald-500" : "bg-white/20"
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform ${
+                showTotal ? "translate-x-5" : "translate-x-0.5"
+              }`}
+            />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ---------- Main app ----------
 let handCounter = 0;
 
@@ -298,6 +343,15 @@ export default function BlackjackTrainer() {
   const [stats, setStats] = useState({ correct: 0, total: 0, streak: 0, best: 0, wins: 0, losses: 0, pushes: 0 });
   const [feedback, setFeedback] = useState(null);
   const [chartOpen, setChartOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [showTotal, setShowTotal] = useState(() => {
+    const stored = localStorage.getItem("21trainer.showTotal");
+    return stored === null ? true : stored === "true";
+  });
+
+  useEffect(() => {
+    localStorage.setItem("21trainer.showTotal", String(showTotal));
+  }, [showTotal]);
 
   const draw = useCallback(() => {
     if (shoeRef.current.length < 20) shoeRef.current = buildShoe(6);
@@ -506,12 +560,21 @@ export default function BlackjackTrainer() {
           <div className="font-serif text-2xl text-yellow-400 leading-none">21 Trainer</div>
           <div className="text-emerald-200/60 text-[11px] mt-0.5">basic strategy, no ads, no ledger</div>
         </div>
-        <button
-          onClick={() => setChartOpen(true)}
-          className="border border-yellow-500/50 text-yellow-300 text-xs font-semibold px-3 py-2 rounded-full bg-white/5 active:bg-white/15"
-        >
-          Chart
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setChartOpen(true)}
+            className="border border-yellow-500/50 text-yellow-300 text-xs font-semibold px-3 py-2 rounded-full bg-white/5 active:bg-white/15"
+          >
+            Chart
+          </button>
+          <button
+            onClick={() => setSettingsOpen(true)}
+            aria-label="Settings"
+            className="border border-yellow-500/50 text-yellow-300 text-xs font-semibold px-3 py-2 rounded-full bg-white/5 active:bg-white/15"
+          >
+            ⚙
+          </button>
+        </div>
       </div>
 
       {/* Stats bar */}
@@ -615,6 +678,13 @@ export default function BlackjackTrainer() {
       </div>
 
       {chartOpen && <StrategyChart onClose={() => setChartOpen(false)} activeHint={buildHint()} />}
+      {settingsOpen && (
+        <SettingsModal
+          onClose={() => setSettingsOpen(false)}
+          showTotal={showTotal}
+          onToggleShowTotal={setShowTotal}
+        />
+      )}
     </div>
   );
 }
