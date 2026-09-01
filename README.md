@@ -1,6 +1,23 @@
 # 21 Trainer
 
-Blackjack basic-strategy trainer. React + Vite + Tailwind, deployable as a static site.
+A mobile-first web app for drilling blackjack basic strategy. It deals you real hands from a shuffled shoe, you decide Hit / Stand / Double / Split / Surrender, and it grades every decision against optimal basic strategy in real time — no ads, no bankroll, no fake chips, just reps.
+
+Built with React, Vite, and Tailwind as a static site; runs entirely in the browser.
+
+## How it works
+
+- **Play** — tap Deal, get two cards against a dealer up-card, and choose your action. Wrong move? It tells you what basic strategy says and why.
+- **Track progress** — accuracy %, current streak, best streak, and hands played, updated live.
+- **Strategy chart** — an in-app overlay of the full hard/soft/pairs/surrender chart, with the cell for your current hand highlighted so you can check yourself before or after acting.
+- **Settings** — toggle whether your hand total is shown (to practice counting it yourself), and choose a 4, 6, or 8-deck shoe.
+
+Rules assumed throughout: dealer stands on soft 17, double after split allowed, no insurance/even money (basic strategy always says decline).
+
+## The strategy
+
+Every decision in the app is checked against the table below — hard totals, soft totals, pair splitting, and 16/15 surrender vs. a dealer 9/10/A. Columns are the dealer's up-card.
+
+![21 Trainer basic strategy chart](docs/strategy-chart.svg)
 
 ## Run locally
 
@@ -11,51 +28,9 @@ npm run dev
 
 Open the printed localhost URL — on your iPhone, connect to the same wifi and visit `http://<your-computer-ip>:5173` to test on the actual device.
 
-## Deploy to Vercel
+## Deployment
 
-**Option A — CLI (fastest, no GitHub needed)**
-
-```bash
-npm install -g vercel
-cd blackjack-trainer
-vercel login
-vercel --prod
-```
-
-Follow the prompts (link to a new project, accept defaults — Vercel auto-detects Vite). You'll get a `https://your-project.vercel.app` URL.
-
-**Option B — GitHub + Vercel dashboard**
-
-```bash
-cd blackjack-trainer
-git init
-git add .
-git commit -m "Initial commit"
-gh repo create blackjack-trainer --public --source=. --push
-```
-
-Then at vercel.com → **Add New Project** → import the repo. Vercel detects the Vite framework automatically (build command `npm run build`, output dir `dist`). Deploy.
-
-**Continuous deployment (already set up)**
-
-`.github/workflows/deploy.yml` deploys to Vercel production automatically
-on every push to `main`, using the Vercel CLI rather than Vercel's own
-GitHub integration. One-time setup, if not already done:
-
-1. Create a Vercel token: vercel.com → your avatar → **Settings** →
-   **Tokens** → **Create Token**.
-2. Add it as a GitHub Actions secret named `VERCEL_TOKEN` — either at
-   github.com → this repo → **Settings** → **Secrets and variables** →
-   **Actions** → **New repository secret**, or from the terminal:
-   ```bash
-   gh secret set VERCEL_TOKEN
-   ```
-   (paste the token when prompted — it's never written to disk or shell
-   history this way).
-
-After that, any push to `main` triggers a production deploy; check
-progress under the repo's **Actions** tab. `vercel --prod` from Option A
-above still works too, for ad-hoc deploys outside of `main`.
+Pushes to `main` deploy automatically to production via GitHub Actions (`.github/workflows/deploy.yml`).
 
 ## How good is the strategy?
 
@@ -67,4 +42,4 @@ versus the standard 3:2 (a lot).
 
 ## Add to iPhone home screen (feels like a native app)
 
-Once deployed, open the Vercel URL in Safari on your iPhone → Share → **Add to Home Screen**. It'll launch full-screen without Safari's UI, which is a solid free stand-in while you build the real SwiftUI version.
+Open the deployed URL in Safari on your iPhone → Share → **Add to Home Screen**. It'll launch full-screen without Safari's UI, which is a solid free stand-in while you build the real SwiftUI version.
