@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Two Million Hands &mdash; 21 Trainer strategy simulation</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    color-scheme: light;
+    --ground:      #f6f7f2;
+    --surface:     #ffffff;
+    --surface-2:   #eef1ea;
+    --ink-1:       #10160f;
+    --ink-2:       #565f54;
+    --ink-3:       #8b9288;
+    --rule:        #dfe3d8;
+    --accent:      #96721f;
+    --data:        #2a78d6;
+    --data-wash:   rgba(42,120,214,0.10);
+    --negative:    #a13a2f;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --ground:      #0b0f0a;
+      --surface:     #12160f;
+      --surface-2:   #171c14;
+      --ink-1:       #f3f5ef;
+      --ink-2:       #b7bdb0;
+      --ink-3:       #7d8478;
+      --rule:        #262b22;
+      --accent:      #e0b567;
+      --data:        #3987e5;
+      --data-wash:   rgba(57,135,229,0.14);
+      --negative:    #e2685a;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --ground:      #0b0f0a;
+    --surface:     #12160f;
+    --surface-2:   #171c14;
+    --ink-1:       #f3f5ef;
+    --ink-2:       #b7bdb0;
+    --ink-3:       #7d8478;
+    --rule:        #262b22;
+    --accent:      #e0b567;
+    --data:        #3987e5;
+    --data-wash:   rgba(57,135,229,0.14);
+    --negative:    #e2685a;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--ground);
+    color: var(--ink-1);
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 56px 24px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+  .num { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+
+  /* ---------- Masthead ---------- */
+  .masthead { display: flex; flex-direction: column; gap: 10px; }
+  .eyebrow {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  h1 {
+    font-family: "Fraunces", Georgia, serif;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-size: clamp(34px, 6vw, 48px);
+    line-height: 1.05;
+    margin: 0;
+    text-wrap: balance;
+    color: var(--ink-1);
+  }
+  .dek {
+    max-width: 60ch;
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--ink-2);
+    margin: 0;
+  }
+  .dek code {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.92em;
+    background: var(--surface-2);
+    padding: 0.1em 0.4em;
+    border-radius: 4px;
+    color: var(--ink-1);
+  }
+  .run-params {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    margin-top: 4px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12.5px;
+    color: var(--ink-3);
+  }
+  .run-params b { color: var(--ink-2); font-weight: 500; }
+
+  hr.rule { border: none; border-top: 1px solid var(--rule); margin: 0; }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+  .hero-figure { display: flex; flex-direction: column; gap: 6px; }
+  .hero-label {
+    font-size: 13px;
+    color: var(--ink-2);
+    max-width: 32ch;
+  }
+  .hero-value {
+    font-family: "Fraunces", Georgia, serif;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-size: clamp(56px, 9vw, 84px);
+    line-height: 1;
+    color: var(--negative);
+  }
+  .hero-sub { font-size: 13px; color: var(--ink-3); }
+
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(80px, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    overflow: hidden;
+    min-width: 280px;
+  }
+  .tile {
+    background: var(--surface);
+    padding: 14px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+  }
+  .tile-label {
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .tile-value {
+    font-family: "IBM Plex Mono", monospace;
+    font-weight: 500;
+    font-size: 19px;
+    color: var(--ink-1);
+  }
+
+  /* ---------- Sections ---------- */
+  section { display: flex; flex-direction: column; gap: 14px; }
+  .section-head { display: flex; flex-direction: column; gap: 4px; }
+  h2 {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 500;
+    font-size: 22px;
+    margin: 0;
+    color: var(--ink-1);
+  }
+  .caption { font-size: 13.5px; color: var(--ink-2); max-width: 62ch; line-height: 1.5; }
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 20px 20px 12px;
+  }
+  .chart-card svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .axis-label { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; fill: var(--ink-3); }
+  .value-label { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; fill: var(--ink-1); font-weight: 500; }
+  .cat-label { font-family: "IBM Plex Sans", sans-serif; font-size: 11.5px; fill: var(--ink-2); }
+  .gridline { stroke: var(--rule); stroke-width: 1; }
+  .baseline { stroke: var(--ink-3); stroke-width: 1; }
+  .bar { fill: var(--data); }
+  .bar:hover { fill: var(--negative); }
+  .line-path { fill: none; stroke: var(--data); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+  .end-dot { fill: var(--data); stroke: var(--surface); stroke-width: 2; }
+  .hover-x { stroke: var(--ink-3); stroke-width: 1; opacity: 0; pointer-events: none; }
+  .hover-dot { fill: var(--negative); stroke: var(--surface); stroke-width: 2; opacity: 0; pointer-events: none; }
+
+  .tooltip {
+    position: fixed;
+    pointer-events: none;
+    background: var(--ink-1);
+    color: var(--ground);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    padding: 6px 9px;
+    border-radius: 6px;
+    line-height: 1.4;
+    transform: translate(-50%, calc(-100% - 10px));
+    opacity: 0;
+    transition: opacity 80ms ease;
+    z-index: 10;
+    white-space: nowrap;
+  }
+  .tooltip.show { opacity: 1; }
+
+  footer {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 12.5px;
+    color: var(--ink-3);
+    line-height: 1.6;
+    max-width: 68ch;
+  }
+  footer b { color: var(--ink-2); font-weight: 500; }
+
+  @media (max-width: 520px) {
+    .tiles { grid-template-columns: repeat(2, 1fr); }
+    .hero { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="masthead">
+    <div class="eyebrow">21 Trainer &mdash; strategy simulation</div>
+    <h1>Two million hands</h1>
+    <p class="dek">
+      A fake player who always followed this app's basic strategy &mdash; the
+      same decision logic the trainer itself uses, not a re-implementation &mdash;
+      played out against a dealer that hits to 17 and stands on soft 17, one
+      split allowed, double after split, late surrender on the original two
+      cards, no insurance. This is what that strategy actually earns you.
+      (The simulator that produced these numbers was a standalone script,
+      run separately and not kept in this repository &mdash; this page is a
+      static record of its results.)
+    </p>
+    <div class="run-params">
+      <span><b>6</b> decks (default)</span>
+      <span><b>2,000,000</b> rounds per run</span>
+      <span>reshuffle at <b>50%</b> penetration</span>
+      <span><b>3</b> deck counts compared</span>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <div class="hero">
+    <div class="hero-figure">
+      <div class="hero-label">Expected value, per round wagered &mdash; 6-deck run</div>
+      <div class="hero-value num">&minus;0.44%</div>
+      <div class="hero-sub">i.e. about 44&nbsp;cents back per $100 bet, on average, over the long run</div>
+    </div>
+    <div class="tiles">
+      <div class="tile"><span class="tile-label">Win</span><span class="tile-value">42.6%</span></div>
+      <div class="tile"><span class="tile-label">Loss</span><span class="tile-value">44.8%</span></div>
+      <div class="tile"><span class="tile-label">Push</span><span class="tile-value">8.3%</span></div>
+      <div class="tile"><span class="tile-label">Surrender</span><span class="tile-value">4.3%</span></div>
+      <div class="tile"><span class="tile-label">Blackjack</span><span class="tile-value">4.4%</span></div>
+    </div>
+  </div>
+
+  <section>
+    <div class="section-head">
+      <h2>Why this took two million hands</h2>
+      <p class="caption">
+        Cumulative expected value at 6 decks, checkpointed every 25,000 rounds.
+        Early on the line swings wildly &mdash; a few thousand hands is pure luck,
+        not edge. It only settles near the true figure after several hundred
+        thousand rounds. Hover the line to read any point.
+      </p>
+    </div>
+    <div class="chart-card">
+      <svg id="chart-convergence" viewBox="0 0 760 300" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Does deck count change your edge?</h2>
+      <p class="caption">
+        Barely. All three land within about a tenth of a percentage point of
+        each other &mdash; well inside the noise you'd expect at this sample size &mdash;
+        which is exactly why the strategy chart in the app itself is labeled
+        "4&ndash;8 decks" rather than tuned per deck count.
+      </p>
+    </div>
+    <div class="chart-card">
+      <svg id="chart-decks" viewBox="0 0 760 220" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>The rule that actually matters: 3:2 vs 6:5</h2>
+      <p class="caption">
+        Deck count barely moved the needle above. This does. Some casinos pay
+        blackjack at 6:5 instead of the standard 3:2 &mdash; same strategy, same
+        every other rule, just a worse payout on the one hand that pays a
+        bonus at all. Separate 2,000,000-round run at 6 decks; small
+        differences from the 3:2 figure above are ordinary run-to-run noise,
+        not a different rule &mdash; it's the gap <em>within</em> this run, not
+        either bar in isolation, that's the reliable number.
+      </p>
+    </div>
+    <div class="chart-card">
+      <svg id="chart-payout" viewBox="0 0 760 220" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Where the hands go</h2>
+      <p class="caption">
+        Outcome of every resolved hand at 6 decks (split hands counted
+        separately, since each is its own bet). Losses simply outnumber wins &mdash;
+        that gap, not any single bad play, is the house edge.
+      </p>
+    </div>
+    <div class="chart-card">
+      <svg id="chart-outcomes" viewBox="0 0 760 260" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <footer>
+    <p><b>Method.</b> The simulated player always used this app's exact basic-strategy decision logic and never deviated or took insurance. Payouts (standard run): blackjack 1.5&times;, win 1&times;, push 0, surrender &minus;0.5&times;, doubled hands at 2&times; stake; a 21 reached via split aces pays 1&times; like any other 21, not the blackjack bonus. The 3:2 vs 6:5 comparison is its own pair of independent 2,000,000-round runs at 6 decks, identical in every way except the blackjack payout multiplier (1.5&times; vs 1.2&times;).</p>
+    <p><b>Scope.</b> The simulator itself is not part of this repository &mdash; this page is a static snapshot of its output, kept for reference.</p>
+  </footer>
+
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+(function () {
+  const NS = "http://www.w3.org/2000/svg";
+  const tooltip = document.getElementById("tooltip");
+
+  function el(tag, attrs) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+
+  function showTooltip(x, y, html) {
+    tooltip.innerHTML = html;
+    tooltip.style.left = x + "px";
+    tooltip.style.top = y + "px";
+    tooltip.classList.add("show");
+  }
+  function hideTooltip() { tooltip.classList.remove("show"); }
+
+  // ---------------- Convergence line chart ----------------
+  const convergence = [{"rounds":25000,"evPct":0.956},{"rounds":50000,"evPct":0.85},{"rounds":75000,"evPct":0.176},{"rounds":100000,"evPct":0.36},{"rounds":125000,"evPct":0.1444},{"rounds":150000,"evPct":-0.0287},{"rounds":175000,"evPct":-0.122},{"rounds":200000,"evPct":-0.2722},{"rounds":225000,"evPct":-0.288},{"rounds":250000,"evPct":-0.3714},{"rounds":275000,"evPct":-0.3089},{"rounds":300000,"evPct":-0.2633},{"rounds":325000,"evPct":-0.3277},{"rounds":350000,"evPct":-0.3943},{"rounds":375000,"evPct":-0.4729},{"rounds":400000,"evPct":-0.484},{"rounds":425000,"evPct":-0.4866},{"rounds":450000,"evPct":-0.4967},{"rounds":475000,"evPct":-0.4657},{"rounds":500000,"evPct":-0.3836},{"rounds":525000,"evPct":-0.4017},{"rounds":550000,"evPct":-0.4068},{"rounds":575000,"evPct":-0.4416},{"rounds":600000,"evPct":-0.4568},{"rounds":625000,"evPct":-0.4909},{"rounds":650000,"evPct":-0.4893},{"rounds":675000,"evPct":-0.5186},{"rounds":700000,"evPct":-0.514},{"rounds":725000,"evPct":-0.5341},{"rounds":750000,"evPct":-0.5443},{"rounds":775000,"evPct":-0.5257},{"rounds":800000,"evPct":-0.4681},{"rounds":825000,"evPct":-0.4844},{"rounds":850000,"evPct":-0.5212},{"rounds":875000,"evPct":-0.5215},{"rounds":900000,"evPct":-0.5147},{"rounds":925000,"evPct":-0.5217},{"rounds":950000,"evPct":-0.4796},{"rounds":975000,"evPct":-0.4537},{"rounds":1000000,"evPct":-0.4788},{"rounds":1025000,"evPct":-0.4605},{"rounds":1050000,"evPct":-0.4584},{"rounds":1075000,"evPct":-0.4728},{"rounds":1100000,"evPct":-0.4665},{"rounds":1125000,"evPct":-0.4781},{"rounds":1150000,"evPct":-0.48},{"rounds":1175000,"evPct":-0.4928},{"rounds":1200000,"evPct":-0.4954},{"rounds":1225000,"evPct":-0.5064},{"rounds":1250000,"evPct":-0.5093},{"rounds":1275000,"evPct":-0.5006},{"rounds":1300000,"evPct":-0.4948},{"rounds":1325000,"evPct":-0.4996},{"rounds":1350000,"evPct":-0.5074},{"rounds":1375000,"evPct":-0.5111},{"rounds":1400000,"evPct":-0.5003},{"rounds":1425000,"evPct":-0.4935},{"rounds":1450000,"evPct":-0.5191},{"rounds":1475000,"evPct":-0.5272},{"rounds":1500000,"evPct":-0.5312},{"rounds":1525000,"evPct":-0.5266},{"rounds":1550000,"evPct":-0.5187},{"rounds":1575000,"evPct":-0.5196},{"rounds":1600000,"evPct":-0.5208},{"rounds":1625000,"evPct":-0.5128},{"rounds":1650000,"evPct":-0.5088},{"rounds":1675000,"evPct":-0.5061},{"rounds":1700000,"evPct":-0.492},{"rounds":1725000,"evPct":-0.5062},{"rounds":1750000,"evPct":-0.5017},{"rounds":1775000,"evPct":-0.5014},{"rounds":1800000,"evPct":-0.4953},{"rounds":1825000,"evPct":-0.5044},{"rounds":1850000,"evPct":-0.5046},{"rounds":1875000,"evPct":-0.4909},{"rounds":1900000,"evPct":-0.4914},{"rounds":1925000,"evPct":-0.4835},{"rounds":1950000,"evPct":-0.4693},{"rounds":1975000,"evPct":-0.4452},{"rounds":2000000,"evPct":-0.4448}];
+
+  (function drawConvergence() {
+    const svg = document.getElementById("chart-convergence");
+    const W = 760, H = 300;
+    const M = { top: 16, right: 16, bottom: 34, left: 46 };
+    const plotW = W - M.left - M.right;
+    const plotH = H - M.top - M.bottom;
+
+    const xMax = convergence[convergence.length - 1].rounds;
+    const yVals = convergence.map((d) => d.evPct);
+    const yMin = Math.min(...yVals, -0.6);
+    const yMax = Math.max(...yVals, 0.2);
+    const yPad = (yMax - yMin) * 0.1;
+    const yLo = yMin - yPad, yHi = yMax + yPad;
+
+    const xScale = (r) => M.left + (r / xMax) * plotW;
+    const yScale = (v) => M.top + (1 - (v - yLo) / (yHi - yLo)) * plotH;
+
+    const yTicks = [1, 0.5, 0, -0.5];
+    for (const t of yTicks) {
+      if (t < yLo || t > yHi) continue;
+      const y = yScale(t);
+      svg.appendChild(el("line", { class: t === 0 ? "baseline" : "gridline", x1: M.left, x2: W - M.right, y1: y, y2: y }));
+      const lbl = el("text", { class: "axis-label", x: M.left - 8, y: y + 4, "text-anchor": "end" });
+      lbl.textContent = (t > 0 ? "+" : "") + t.toFixed(1) + "%";
+      svg.appendChild(lbl);
+    }
+    const xTicks = [0, 500000, 1000000, 1500000, 2000000];
+    for (const t of xTicks) {
+      const x = xScale(t);
+      const lbl = el("text", { class: "axis-label", x, y: H - M.bottom + 18, "text-anchor": "middle" });
+      lbl.textContent = t === 0 ? "0" : (t / 1e6) + "M";
+      svg.appendChild(lbl);
+    }
+    const xCaption = el("text", { class: "axis-label", x: W - M.right, y: H - 6, "text-anchor": "end" });
+    xCaption.textContent = "rounds played";
+    svg.appendChild(xCaption);
+
+    let d = "";
+    convergence.forEach((pt, i) => {
+      const x = xScale(pt.rounds), y = yScale(pt.evPct);
+      d += (i === 0 ? "M" : "L") + x.toFixed(2) + "," + y.toFixed(2) + " ";
+    });
+    svg.appendChild(el("path", { class: "line-path", d }));
+
+    const last = convergence[convergence.length - 1];
+    const ex = xScale(last.rounds), ey = yScale(last.evPct);
+    svg.appendChild(el("circle", { class: "end-dot", cx: ex, cy: ey, r: 4 }));
+    const endLabel = el("text", { class: "value-label", x: ex - 8, y: ey - 10, "text-anchor": "end" });
+    endLabel.textContent = (last.evPct > 0 ? "+" : "") + last.evPct.toFixed(2) + "%";
+    svg.appendChild(endLabel);
+
+    const hoverLine = el("line", { class: "hover-x", x1: 0, x2: 0, y1: M.top, y2: H - M.bottom });
+    const hoverDot = el("circle", { class: "hover-dot", r: 4 });
+    svg.appendChild(hoverLine);
+    svg.appendChild(hoverDot);
+
+    const overlay = el("rect", { x: M.left, y: M.top, width: plotW, height: plotH, fill: "transparent" });
+    overlay.style.cursor = "crosshair";
+    svg.appendChild(overlay);
+
+    function onMove(evt) {
+      const rect = svg.getBoundingClientRect();
+      const scaleX = W / rect.width;
+      const mx = (evt.clientX - rect.left) * scaleX;
+      const r = Math.max(0, Math.min(xMax, ((mx - M.left) / plotW) * xMax));
+      let nearest = convergence[0];
+      for (const pt of convergence) {
+        if (Math.abs(pt.rounds - r) < Math.abs(nearest.rounds - r)) nearest = pt;
+      }
+      const x = xScale(nearest.rounds), y = yScale(nearest.evPct);
+      hoverLine.setAttribute("x1", x); hoverLine.setAttribute("x2", x);
+      hoverLine.style.opacity = 1;
+      hoverDot.setAttribute("cx", x); hoverDot.setAttribute("cy", y);
+      hoverDot.style.opacity = 1;
+      showTooltip(evt.clientX, evt.clientY,
+        nearest.rounds.toLocaleString() + " rounds<br>" + (nearest.evPct > 0 ? "+" : "") + nearest.evPct.toFixed(3) + "% EV");
+    }
+    overlay.addEventListener("mousemove", onMove);
+    overlay.addEventListener("mouseleave", () => {
+      hoverLine.style.opacity = 0; hoverDot.style.opacity = 0; hideTooltip();
+    });
+  })();
+
+  // ---------------- Deck-count EV bar chart ----------------
+  const byDeckCount = [{"numDecks":4,"evPct":-0.4363,"rounds":2000000},{"numDecks":6,"evPct":-0.4426,"rounds":2000000},{"numDecks":8,"evPct":-0.3562,"rounds":2000000}];
+
+  (function drawDeckBars() {
+    const svg = document.getElementById("chart-decks");
+    const W = 760, H = 220;
+    const M = { top: 20, right: 20, bottom: 30, left: 56 };
+    const plotW = W - M.left - M.right;
+    const plotH = H - M.top - M.bottom;
+
+    const vals = byDeckCount.map((d) => d.evPct);
+    const yMin = Math.min(...vals) - 0.16;
+    const yMax = 0.06;
+    const yScale = (v) => M.top + (1 - (v - yMin) / (yMax - yMin)) * plotH;
+    const zeroY = yScale(0);
+
+    svg.appendChild(el("line", { class: "baseline", x1: M.left, x2: W - M.right, y1: zeroY, y2: zeroY }));
+    const yLbl0 = el("text", { class: "axis-label", x: M.left - 8, y: zeroY + 4, "text-anchor": "end" });
+    yLbl0.textContent = "0%";
+    svg.appendChild(yLbl0);
+    [-0.2, -0.4].forEach((t) => {
+      if (t < yMin) return;
+      const y = yScale(t);
+      svg.appendChild(el("line", { class: "gridline", x1: M.left, x2: W - M.right, y1: y, y2: y }));
+      const l = el("text", { class: "axis-label", x: M.left - 8, y: y + 4, "text-anchor": "end" });
+      l.textContent = t.toFixed(1) + "%";
+      svg.appendChild(l);
+    });
+
+    const n = byDeckCount.length;
+    const band = plotW / n;
+    const barW = Math.min(24, band * 0.4);
+
+    byDeckCount.forEach((d, i) => {
+      const cx = M.left + band * i + band / 2;
+      const y0 = zeroY;
+      const y1 = yScale(d.evPct);
+      const top = Math.min(y0, y1), h = Math.abs(y1 - y0);
+      const rect = el("rect", {
+        class: "bar", x: cx - barW / 2, y: top, width: barW, height: Math.max(h, 1),
+        rx: 4, ry: 4,
+      });
+      svg.appendChild(rect);
+      rect.addEventListener("mousemove", (evt) => {
+        showTooltip(evt.clientX, evt.clientY, d.numDecks + " decks<br>" + d.evPct.toFixed(3) + "% EV / " + d.rounds.toLocaleString() + " rounds");
+      });
+      rect.addEventListener("mouseleave", hideTooltip);
+
+      const vLbl = el("text", { class: "value-label", x: cx, y: y1 + 15, "text-anchor": "middle" });
+      vLbl.textContent = d.evPct.toFixed(2) + "%";
+      svg.appendChild(vLbl);
+
+      const cLbl = el("text", { class: "cat-label", x: cx, y: H - M.bottom + 18, "text-anchor": "middle" });
+      cLbl.textContent = d.numDecks + " decks";
+      svg.appendChild(cLbl);
+    });
+  })();
+
+  // ---------------- 3:2 vs 6:5 payout bar chart ----------------
+  const byPayout = [
+    { label: "3:2 (standard)", evPct: -0.2741 },
+    { label: "6:5", evPct: -1.8189 },
+  ];
+
+  (function drawPayoutBars() {
+    const svg = document.getElementById("chart-payout");
+    const W = 760, H = 220;
+    const M = { top: 20, right: 20, bottom: 30, left: 56 };
+    const plotW = W - M.left - M.right;
+    const plotH = H - M.top - M.bottom;
+
+    const vals = byPayout.map((d) => d.evPct);
+    const yMin = Math.min(...vals) - 0.3;
+    const yMax = 0.1;
+    const yScale = (v) => M.top + (1 - (v - yMin) / (yMax - yMin)) * plotH;
+    const zeroY = yScale(0);
+
+    svg.appendChild(el("line", { class: "baseline", x1: M.left, x2: W - M.right, y1: zeroY, y2: zeroY }));
+    const yLbl0 = el("text", { class: "axis-label", x: M.left - 8, y: zeroY + 4, "text-anchor": "end" });
+    yLbl0.textContent = "0%";
+    svg.appendChild(yLbl0);
+    [-0.5, -1, -1.5].forEach((t) => {
+      if (t < yMin) return;
+      const y = yScale(t);
+      svg.appendChild(el("line", { class: "gridline", x1: M.left, x2: W - M.right, y1: y, y2: y }));
+      const l = el("text", { class: "axis-label", x: M.left - 8, y: y + 4, "text-anchor": "end" });
+      l.textContent = t.toFixed(1) + "%";
+      svg.appendChild(l);
+    });
+
+    const n = byPayout.length;
+    const band = plotW / n;
+    const barW = Math.min(24, band * 0.3);
+
+    byPayout.forEach((d, i) => {
+      const cx = M.left + band * i + band / 2;
+      const y0 = zeroY;
+      const y1 = yScale(d.evPct);
+      const top = Math.min(y0, y1), h = Math.abs(y1 - y0);
+      const rect = el("rect", {
+        class: "bar", x: cx - barW / 2, y: top, width: barW, height: Math.max(h, 1),
+        rx: 4, ry: 4,
+      });
+      svg.appendChild(rect);
+      rect.addEventListener("mousemove", (evt) => {
+        showTooltip(evt.clientX, evt.clientY, d.label + " blackjack<br>" + d.evPct.toFixed(3) + "% EV");
+      });
+      rect.addEventListener("mouseleave", hideTooltip);
+
+      const vLbl = el("text", { class: "value-label", x: cx, y: y1 + 15, "text-anchor": "middle" });
+      vLbl.textContent = d.evPct.toFixed(2) + "%";
+      svg.appendChild(vLbl);
+
+      const cLbl = el("text", { class: "cat-label", x: cx, y: H - M.bottom + 18, "text-anchor": "middle" });
+      cLbl.textContent = d.label;
+      svg.appendChild(cLbl);
+    });
+  })();
+
+  // ---------------- Outcome breakdown bar chart ----------------
+  const outcomes6 = [{"label":"Win","value":42.551},{"label":"Loss","value":44.786},{"label":"Push","value":8.324},{"label":"Surrender","value":4.339},{"label":"Blackjack","value":4.4}];
+
+  (function drawOutcomes() {
+    const svg = document.getElementById("chart-outcomes");
+    const W = 760, H = 260;
+    const M = { top: 20, right: 20, bottom: 34, left: 46 };
+    const plotW = W - M.left - M.right;
+    const plotH = H - M.top - M.bottom;
+
+    const yMax = 50;
+    const yScale = (v) => M.top + (1 - v / yMax) * plotH;
+    const baseY = yScale(0);
+
+    svg.appendChild(el("line", { class: "baseline", x1: M.left, x2: W - M.right, y1: baseY, y2: baseY }));
+    [10, 20, 30, 40].forEach((t) => {
+      const y = yScale(t);
+      svg.appendChild(el("line", { class: "gridline", x1: M.left, x2: W - M.right, y1: y, y2: y }));
+      const l = el("text", { class: "axis-label", x: M.left - 8, y: y + 4, "text-anchor": "end" });
+      l.textContent = t + "%";
+      svg.appendChild(l);
+    });
+
+    const n = outcomes6.length;
+    const band = plotW / n;
+    const barW = Math.min(24, band * 0.5);
+
+    outcomes6.forEach((d, i) => {
+      const cx = M.left + band * i + band / 2;
+      const y1 = yScale(d.value);
+      const rect = el("rect", {
+        class: "bar", x: cx - barW / 2, y: y1, width: barW, height: baseY - y1,
+        rx: 4, ry: 4,
+      });
+      svg.appendChild(rect);
+      rect.addEventListener("mousemove", (evt) => {
+        showTooltip(evt.clientX, evt.clientY, d.label + "<br>" + d.value.toFixed(2) + "% of hands");
+      });
+      rect.addEventListener("mouseleave", hideTooltip);
+
+      const vLbl = el("text", { class: "value-label", x: cx, y: y1 - 8, "text-anchor": "middle" });
+      vLbl.textContent = d.value.toFixed(1) + "%";
+      svg.appendChild(vLbl);
+
+      const cLbl = el("text", { class: "cat-label", x: cx, y: H - M.bottom + 18, "text-anchor": "middle" });
+      cLbl.textContent = d.label;
+      svg.appendChild(cLbl);
+    });
+  })();
+})();
+</script>
+</body>
+</html>

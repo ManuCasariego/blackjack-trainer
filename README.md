@@ -36,6 +36,14 @@ gh repo create blackjack-trainer --public --source=. --push
 
 Then at vercel.com → **Add New Project** → import the repo. Vercel detects the Vite framework automatically (build command `npm run build`, output dir `dist`). Deploy.
 
+## How good is the strategy?
+
+[docs/simulation-results.html](docs/simulation-results.html) (open it
+directly in a browser) has the results of simulating millions of hands
+played with this app's exact strategy: win rate, expected value, whether
+deck count matters (barely), and how much a 6:5 blackjack payout costs you
+versus the standard 3:2 (a lot).
+
 ## Add to iPhone home screen (feels like a native app)
 
 Once deployed, open the Vercel URL in Safari on your iPhone → Share → **Add to Home Screen**. It'll launch full-screen without Safari's UI, which is a solid free stand-in while you build the real SwiftUI version.
