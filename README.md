@@ -1,5 +1,7 @@
 # 21 Trainer
 
+**Live: [blackjack-trainer-pearl.vercel.app](https://blackjack-trainer-pearl.vercel.app)**
+
 A mobile-first web app for drilling blackjack basic strategy. It deals you real hands from a shuffled shoe, you decide Hit / Stand / Double / Split / Surrender, and it grades every decision against optimal basic strategy in real time — no ads, no bankroll, no fake chips, just reps.
 
 Built with React, Vite, and Tailwind as a static site; runs entirely in the browser.
@@ -42,4 +44,4 @@ versus the standard 3:2 (a lot).
 
 ## Add to iPhone home screen (feels like a native app)
 
-Open the deployed URL in Safari on your iPhone → Share → **Add to Home Screen**. It'll launch full-screen without Safari's UI, which is a solid free stand-in while you build the real SwiftUI version.
+Open [blackjack-trainer-pearl.vercel.app](https://blackjack-trainer-pearl.vercel.app) in Safari on your iPhone → Share → **Add to Home Screen**. It'll launch full-screen without Safari's UI, which is a solid free stand-in while you build the real SwiftUI version.
