@@ -290,7 +290,15 @@ function StrategyChart({ onClose, activeHint }) {
 // ---------- Settings overlay ----------
 const DECK_OPTIONS = [4, 6, 8];
 
-function SettingsModal({ onClose, showTotal, onToggleShowTotal, numDecks, onChangeNumDecks }) {
+function SettingsModal({
+  onClose,
+  showTotal,
+  onToggleShowTotal,
+  numDecks,
+  onChangeNumDecks,
+  softOnly,
+  onToggleSoftOnly,
+}) {
   return (
     <div className="fixed inset-0 z-50 bg-black/70 flex items-end sm:items-center justify-center">
       <div
@@ -326,6 +334,30 @@ function SettingsModal({ onClose, showTotal, onToggleShowTotal, numDecks, onChan
             <span
               className={`absolute top-0.5 left-0 w-6 h-6 rounded-full bg-white shadow transition-transform ${
                 showTotal ? "translate-x-[22px]" : "translate-x-0.5"
+              }`}
+            />
+          </button>
+        </div>
+
+        <div className="flex items-center justify-between gap-3 py-3 border-t border-white/10">
+          <div className="min-w-0">
+            <div className="text-sm font-semibold text-emerald-100">Soft hands only</div>
+            <div className="text-xs text-emerald-200/60 mt-0.5">
+              Deal only starts with Ace + 2–9, to drill the soft strategy chart
+            </div>
+          </div>
+          <button
+            role="switch"
+            aria-checked={softOnly}
+            aria-label="Soft hands only"
+            onClick={() => onToggleSoftOnly(!softOnly)}
+            className={`w-12 h-7 rounded-full relative transition-colors shrink-0 ${
+              softOnly ? "bg-emerald-500" : "bg-white/20"
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 left-0 w-6 h-6 rounded-full bg-white shadow transition-transform ${
+                softOnly ? "translate-x-[22px]" : "translate-x-0.5"
               }`}
             />
           </button>
@@ -385,6 +417,13 @@ export default function BlackjackTrainer() {
       return 6;
     }
   });
+  const [softOnly, setSoftOnly] = useState(() => {
+    try {
+      return localStorage.getItem("21trainer.softOnly") === "true";
+    } catch {
+      return false;
+    }
+  });
 
   const shoeRef = useRef(buildShoe(numDecks));
   const shoeDecksRef = useRef(numDecks);
@@ -405,6 +444,14 @@ export default function BlackjackTrainer() {
     }
   }, [numDecks]);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem("21trainer.softOnly", String(softOnly));
+    } catch {
+      // localStorage unavailable (e.g. private browsing) — setting just won't persist
+    }
+  }, [softOnly]);
+
   const draw = useCallback(() => {
     if (shoeRef.current.length < 20) {
       shoeRef.current = buildShoe(numDecks);
@@ -417,14 +464,31 @@ export default function BlackjackTrainer() {
     return dealer.cards[0]?.rank;
   }
 
+  function isSoftPair(c1, c2) {
+    const isAce = (c) => c.rank === "A";
+    const other = isAce(c1) ? c2 : isAce(c2) ? c1 : null;
+    if (!other) return false;
+    if (isAce(other)) return false; // exclude A,A — that's a pair-chart decision, not soft
+    return rankValue(other.rank) !== 10; // exclude blackjack (A + ten-value)
+  }
+
+  function drawSoftPlayerHand() {
+    let c1 = draw(),
+      c2 = draw();
+    while (!isSoftPair(c1, c2)) {
+      c1 = draw();
+      c2 = draw();
+    }
+    return [c1, c2];
+  }
+
   function startHand() {
     if (shoeDecksRef.current !== numDecks) {
       shoeRef.current = buildShoe(numDecks);
       shoeDecksRef.current = numDecks;
     }
-    const p1 = draw(),
-      p2 = draw(),
-      d1 = draw(),
+    const [p1, p2] = softOnly ? drawSoftPlayerHand() : [draw(), draw()];
+    const d1 = draw(),
       d2 = draw();
     const newHands = [{ id: handCounter++, cards: [p1, p2], done: false, isDoubled: false, result: null, bust: false }];
     setHands(newHands);
@@ -751,6 +815,8 @@ export default function BlackjackTrainer() {
             onToggleShowTotal={setShowTotal}
             numDecks={numDecks}
             onChangeNumDecks={setNumDecks}
+            softOnly={softOnly}
+            onToggleSoftOnly={setSoftOnly}
           />
         )}
       </div>
