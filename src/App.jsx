@@ -134,30 +134,32 @@ const CARD_BACK = {
 };
 
 function PlayingCard({ card, hidden, small }) {
-  const w = small ? "w-11 h-16" : "w-14 h-20";
+  const w = small
+    ? "w-11 h-16 sm:w-14 sm:h-20 md:w-16 md:h-24"
+    : "w-14 h-20 sm:w-16 sm:h-24 md:w-20 md:h-28";
   if (hidden) {
     return (
       <div
         className={`${w} rounded-md border-2 border-yellow-600/40 shadow-lg flex items-center justify-center`}
         style={CARD_BACK}
       >
-        <div className="w-5 h-5 rounded-full border border-yellow-500/60" />
+        <div className="w-5 h-5 md:w-7 md:h-7 rounded-full border border-yellow-500/60" />
       </div>
     );
   }
   const red = RED_SUITS.includes(card.suit);
   return (
     <div
-      className={`${w} rounded-md bg-white shadow-lg flex flex-col justify-between px-1.5 py-1 border border-black/10`}
+      className={`${w} rounded-md bg-white shadow-lg flex flex-col justify-between px-1.5 py-1 md:px-2 md:py-1.5 border border-black/10`}
     >
-      <div className={`text-xs font-bold leading-none ${red ? "text-red-600" : "text-gray-900"}`}>
+      <div className={`text-xs md:text-base font-bold leading-none ${red ? "text-red-600" : "text-gray-900"}`}>
         {card.rank}
       </div>
-      <div className={`text-lg leading-none self-center ${red ? "text-red-600" : "text-gray-900"}`}>
+      <div className={`text-lg md:text-2xl leading-none self-center ${red ? "text-red-600" : "text-gray-900"}`}>
         {card.suit}
       </div>
       <div
-        className={`text-xs font-bold leading-none self-end rotate-180 ${red ? "text-red-600" : "text-gray-900"}`}
+        className={`text-xs md:text-base font-bold leading-none self-end rotate-180 ${red ? "text-red-600" : "text-gray-900"}`}
       >
         {card.rank}
       </div>
@@ -610,153 +612,157 @@ export default function BlackjackTrainer() {
   const accuracy = stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : null;
 
   return (
-    <div className="min-h-screen w-full flex flex-col text-white" style={FELT_BG}>
-      {/* Header */}
-      <div className="px-4 pt-5 pb-2 flex items-center justify-between">
-        <div>
-          <div className="font-serif text-2xl text-yellow-400 leading-none">21 Trainer</div>
-          <div className="text-emerald-200/60 text-[11px] mt-0.5">basic strategy, no ads, no ledger</div>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setChartOpen(true)}
-            className="border border-yellow-500/50 text-yellow-300 text-xs font-semibold px-3 py-2 rounded-full bg-white/5 active:bg-white/15"
-          >
-            Chart
-          </button>
-          <button
-            onClick={() => setSettingsOpen(true)}
-            aria-label="Settings"
-            className="border border-yellow-500/50 text-yellow-300 text-xs font-semibold px-3 py-2 rounded-full bg-white/5 active:bg-white/15"
-          >
-            ⚙
-          </button>
-        </div>
-      </div>
-
-      {/* Stats bar */}
-      <div className="mx-4 mb-3 grid grid-cols-4 gap-2 text-center">
-        <Stat label="Accuracy" value={accuracy === null ? "—" : `${accuracy}%`} />
-        <Stat label="Streak" value={stats.streak} />
-        <Stat label="Best" value={stats.best} />
-        <Stat label="Hands" value={stats.wins + stats.losses + stats.pushes} />
-      </div>
-
-      {/* Table */}
-      <div className="flex-1 flex flex-col justify-between px-4 pb-4">
-        <div>
-          <div className="text-[11px] uppercase tracking-widest text-emerald-200/50 mb-1">Dealer</div>
-          <div className="flex gap-2 items-center min-h-[5rem]">
-            {dealer.cards.map((c, i) => (
-              <PlayingCard key={c.id} card={c} hidden={i === 1 && dealer.hideHole} />
-            ))}
-            {dealer.cards.length > 0 && !dealer.hideHole && (
-              <span className="ml-2 text-yellow-300 font-semibold text-sm">{handValue(dealer.cards).total}</span>
-            )}
+    <div className="min-h-screen w-full flex justify-center text-white" style={FELT_BG}>
+      <div className="w-full max-w-2xl flex flex-col">
+        {/* Header */}
+        <div className="px-4 md:px-6 pt-5 md:pt-8 pb-2 flex items-center justify-between">
+          <div>
+            <div className="font-serif text-2xl md:text-3xl text-yellow-400 leading-none">21 Trainer</div>
+            <div className="text-emerald-200/60 text-[11px] md:text-sm mt-0.5">basic strategy, no ads, no ledger</div>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setChartOpen(true)}
+              className="border border-yellow-500/50 text-yellow-300 text-xs md:text-sm font-semibold px-3 md:px-4 py-2 md:py-2.5 rounded-full bg-white/5 hover:bg-white/10 active:bg-white/15"
+            >
+              Chart
+            </button>
+            <button
+              onClick={() => setSettingsOpen(true)}
+              aria-label="Settings"
+              className="border border-yellow-500/50 text-yellow-300 text-xs md:text-sm font-semibold px-3 md:px-4 py-2 md:py-2.5 rounded-full bg-white/5 hover:bg-white/10 active:bg-white/15"
+            >
+              ⚙
+            </button>
           </div>
         </div>
 
-        <div className="my-4">
-          <div className="text-[11px] uppercase tracking-widest text-emerald-200/50 mb-1">
-            {hands.length > 1 ? `Your hands` : "You"}
-          </div>
-          <div className="flex gap-4 overflow-x-auto pb-1">
-            {hands.map((h, i) => {
-              const v = handValue(h.cards);
-              const isActive = stage === "player" && i === activeHand;
-              return (
-                <div
-                  key={h.id}
-                  className={`rounded-xl p-2 ${isActive ? "bg-white/10 ring-1 ring-yellow-400/60" : ""}`}
-                >
-                  <div className="flex gap-1.5 mb-1">
-                    {h.cards.map((c) => (
-                      <PlayingCard key={c.id} card={c} small />
-                    ))}
-                  </div>
-                  <div className="flex items-center gap-2 text-xs">
-                    <span className="font-semibold text-yellow-200">
-                      {showTotal || stage === "result" || h.done
-                        ? v.soft
-                          ? `Soft ${v.total}`
-                          : v.total
-                        : "—"}
-                    </span>
-                    {h.isDoubled && <span className="text-emerald-300">2x</span>}
-                    {h.result && <ResultBadge result={h.result} />}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+        {/* Stats bar */}
+        <div className="mx-4 md:mx-6 mb-3 grid grid-cols-4 gap-2 md:gap-3 text-center">
+          <Stat label="Accuracy" value={accuracy === null ? "—" : `${accuracy}%`} />
+          <Stat label="Streak" value={stats.streak} />
+          <Stat label="Best" value={stats.best} />
+          <Stat label="Hands" value={stats.wins + stats.losses + stats.pushes} />
         </div>
 
-        {/* Feedback */}
-        {feedback && stage !== "idle" && (
-          <div
-            className={`mb-3 rounded-lg px-3 py-2 text-sm font-medium ${
-              feedback.correct ? "bg-emerald-700/40 text-emerald-100" : "bg-red-700/40 text-red-100"
-            }`}
-          >
-            {feedback.correct
-              ? `Correct — ${ACTION_LABEL[feedback.chosen]}`
-              : `You chose ${ACTION_LABEL[feedback.chosen]}. Basic strategy says ${ACTION_LABEL[feedback.optimal]}.`}
-          </div>
-        )}
-
-        {/* Round result */}
-        {stage === "result" && (
-          <div className="mb-3 text-center">
-            <div className="text-lg font-serif text-yellow-300">
-              {hands.every((h) => h.result === "win")
-                ? "You win"
-                : hands.every((h) => h.result === "lose" || h.result === "surrender")
-                ? "Dealer wins"
-                : "Round over"}
+        {/* Table */}
+        <div className="flex-1 flex flex-col justify-between px-4 md:px-6 pb-4">
+          <div>
+            <div className="text-[11px] md:text-sm uppercase tracking-widest text-emerald-200/50 mb-1 md:mb-2">Dealer</div>
+            <div className="flex gap-2 md:gap-3 items-center min-h-[5rem] md:min-h-[7rem]">
+              {dealer.cards.map((c, i) => (
+                <PlayingCard key={c.id} card={c} hidden={i === 1 && dealer.hideHole} />
+              ))}
+              {dealer.cards.length > 0 && !dealer.hideHole && (
+                <span className="ml-2 text-yellow-300 font-semibold text-sm md:text-lg">{handValue(dealer.cards).total}</span>
+              )}
             </div>
           </div>
-        )}
 
-        {/* Actions */}
-        {stage === "player" && (
-          <div className="grid grid-cols-5 gap-2">
-            <ActionBtn label="Hit" onClick={() => act("H")} />
-            <ActionBtn label="Stand" onClick={() => act("S")} />
-            <ActionBtn label="Double" onClick={() => act("D")} disabled={!flags.canDouble} />
-            <ActionBtn label="Split" onClick={() => act("P")} disabled={!flags.canSplit} />
-            <ActionBtn label="Surr." onClick={() => act("R")} disabled={!flags.canSurrender} />
+          <div className="my-4">
+            <div className="text-[11px] md:text-sm uppercase tracking-widest text-emerald-200/50 mb-1 md:mb-2">
+              {hands.length > 1 ? `Your hands` : "You"}
+            </div>
+            <div className="flex gap-4 overflow-x-auto pb-1">
+              {hands.map((h, i) => {
+                const v = handValue(h.cards);
+                const isActive = stage === "player" && i === activeHand;
+                return (
+                  <div
+                    key={h.id}
+                    className={`rounded-xl p-2 md:p-3 ${isActive ? "bg-white/10 ring-1 ring-yellow-400/60" : ""}`}
+                  >
+                    <div className="flex gap-1.5 md:gap-2 mb-1 md:mb-2">
+                      {h.cards.map((c) => (
+                        <PlayingCard key={c.id} card={c} small />
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-2 text-xs md:text-sm">
+                      <span className="font-semibold text-yellow-200">
+                        {showTotal || stage === "result" || h.done
+                          ? v.soft
+                            ? `Soft ${v.total}`
+                            : v.total
+                          : "—"}
+                      </span>
+                      {h.isDoubled && <span className="text-emerald-300">2x</span>}
+                      {h.result && <ResultBadge result={h.result} />}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        )}
 
-        {(stage === "idle" || stage === "result") && (
-          <button
-            onClick={startHand}
-            className="w-full py-3.5 rounded-full bg-yellow-500 text-emerald-950 font-bold text-base active:bg-yellow-400"
-          >
-            {stage === "idle" ? "Deal" : "Next Hand"}
-          </button>
+          {/* Feedback */}
+          {feedback && stage !== "idle" && (
+            <div
+              className={`mb-3 rounded-lg px-3 py-2 md:px-4 md:py-3 text-sm md:text-base font-medium ${
+                feedback.correct ? "bg-emerald-700/40 text-emerald-100" : "bg-red-700/40 text-red-100"
+              }`}
+            >
+              {feedback.correct
+                ? `Correct — ${ACTION_LABEL[feedback.chosen]}`
+                : `You chose ${ACTION_LABEL[feedback.chosen]}. Basic strategy says ${ACTION_LABEL[feedback.optimal]}.`}
+            </div>
+          )}
+
+          {/* Round result */}
+          {stage === "result" && (
+            <div className="mb-3 text-center">
+              <div className="text-lg md:text-2xl font-serif text-yellow-300">
+                {hands.every((h) => h.result === "win")
+                  ? "You win"
+                  : hands.every((h) => h.result === "lose" || h.result === "surrender")
+                  ? "Dealer wins"
+                  : "Round over"}
+              </div>
+            </div>
+          )}
+
+          {/* Actions */}
+          {stage === "player" && (
+            <div className="grid grid-cols-5 gap-2 md:gap-3">
+              <ActionBtn label="Hit" onClick={() => act("H")} />
+              <ActionBtn label="Stand" onClick={() => act("S")} />
+              <ActionBtn label="Double" onClick={() => act("D")} disabled={!flags.canDouble} />
+              <ActionBtn label="Split" onClick={() => act("P")} disabled={!flags.canSplit} />
+              <ActionBtn label="Surr." onClick={() => act("R")} disabled={!flags.canSurrender} />
+            </div>
+          )}
+
+          {(stage === "idle" || stage === "result") && (
+            <div className="grid grid-cols-5 gap-2 md:gap-3">
+              <button
+                onClick={startHand}
+                className="col-span-5 aspect-[5/1] flex items-center justify-center rounded-full bg-yellow-500 text-emerald-950 font-bold text-base md:text-lg active:bg-yellow-400 hover:bg-yellow-400"
+              >
+                {stage === "idle" ? "Deal" : "Next Hand"}
+              </button>
+            </div>
+          )}
+        </div>
+
+        {chartOpen && <StrategyChart onClose={() => setChartOpen(false)} activeHint={buildHint()} />}
+        {settingsOpen && (
+          <SettingsModal
+            onClose={() => setSettingsOpen(false)}
+            showTotal={showTotal}
+            onToggleShowTotal={setShowTotal}
+            numDecks={numDecks}
+            onChangeNumDecks={setNumDecks}
+          />
         )}
       </div>
-
-      {chartOpen && <StrategyChart onClose={() => setChartOpen(false)} activeHint={buildHint()} />}
-      {settingsOpen && (
-        <SettingsModal
-          onClose={() => setSettingsOpen(false)}
-          showTotal={showTotal}
-          onToggleShowTotal={setShowTotal}
-          numDecks={numDecks}
-          onChangeNumDecks={setNumDecks}
-        />
-      )}
     </div>
   );
 }
 
 function Stat({ label, value }) {
   return (
-    <div className="bg-white/5 rounded-lg py-2">
-      <div className="text-base font-bold text-yellow-300 leading-none">{value}</div>
-      <div className="text-[10px] text-emerald-200/50 mt-1 uppercase tracking-wide">{label}</div>
+    <div className="bg-white/5 rounded-lg py-2 md:py-3">
+      <div className="text-base md:text-xl font-bold text-yellow-300 leading-none">{value}</div>
+      <div className="text-[10px] md:text-xs text-emerald-200/50 mt-1 uppercase tracking-wide">{label}</div>
     </div>
   );
 }
@@ -766,8 +772,8 @@ function ActionBtn({ label, onClick, disabled }) {
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`py-3 rounded-xl text-xs font-semibold ${
-        disabled ? "bg-white/5 text-white/25" : "bg-emerald-700 text-white active:bg-emerald-600"
+      className={`aspect-square flex items-center justify-center rounded-xl text-xs md:text-sm font-semibold ${
+        disabled ? "bg-white/5 text-white/25" : "bg-emerald-700 text-white hover:bg-emerald-600 active:bg-emerald-600"
       }`}
     >
       {label}
